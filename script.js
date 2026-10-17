@@ -1,68 +1,79 @@
-const TOTAL_FRAMES = 7;
-// AGAR images .jpg extension me hain toh yahan '.jpg' kar lein
-const IMAGE_EXTENSION = '.jpeg';
+const TOTAL_FRAMES = 48; // Total 48 frames (001 to 048)
+const IMAGE_FOLDER = 'images'; // Folder ka naam
 
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 
 const images = [];
-let loadedImagesCount = 0;
+let loadedCount = 0;
 
-// Window size ke hisab se Canvas resize aur draw karna
+// Helper: 1 ko "001", 10 ko "010" banane ke liye 3-digit zero-padding
+function formatFrameNumber(num) {
+  return String(num).padStart(3, '0');
+}
+
+// Image Path Generator: images/ezgif-frame-001.jpg
+function getImagePath(frameIndex) {
+  const formattedNumber = formatFrameNumber(frameIndex);
+  return `${IMAGE_FOLDER}/ezgif-frame-${formattedNumber}.jpg`;
+}
+
+// Window size ke according Canvas setup
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   renderFrame(getCurrentFrameIndex());
 }
 
-// Preload Images
+// Preload all 48 frames for lag-free scrolling
 function preloadImages() {
   for (let i = 1; i <= TOTAL_FRAMES; i++) {
     const img = new Image();
-    const src = `${i}${IMAGE_EXTENSION}`;
+    const src = getImagePath(i);
     img.src = src;
 
     img.onload = () => {
-      loadedImagesCount++;
+      loadedCount++;
       if (i === 1) {
         renderFrame(1);
       }
     };
 
     img.onerror = () => {
-      console.warn(`Image load nahi ho saki: ${src}. Make sure file exists in the main folder.`);
+      console.error(`Frame load nahi ho saka: ${src}. Check karein ki path aur filename sahi hain.`);
     };
 
     images.push(img);
   }
 }
 
-// Current Scroll Percentage ke basis par Frame Calculate karna
+// Scroll Percentage ke according Exact Frame Index (1 to 48) calculate karna
 function getCurrentFrameIndex() {
   const scrollTop = window.scrollY || document.documentElement.scrollTop;
   const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
   
   if (maxScroll <= 0) return 1;
 
+  // Scroll ratio between 0.0 and 1.0
   const scrollFraction = Math.min(1, Math.max(0, scrollTop / maxScroll));
   
-  // Calculate Frame from 1 to TOTAL_FRAMES
+  // Half scroll (0.5) = Frame 24 | Full scroll (1.0) = Frame 48
   const frameIndex = Math.min(
     TOTAL_FRAMES,
-    Math.max(1, Math.floor(scrollFraction * TOTAL_FRAMES) + 1)
+    Math.max(1, Math.floor(scrollFraction * (TOTAL_FRAMES - 1)) + 1)
   );
   
   return frameIndex;
 }
 
-// Draw Frame on Canvas with Cover Aspect Ratio (Image stretch na ho)
+// Canvas par frame render karna (Aspect Ratio Preserve karke)
 function renderFrame(frameIndex) {
   const img = images[frameIndex - 1];
   if (!img || !img.complete || img.naturalWidth === 0) return;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Background Image ko Screen size ke according proportional cover karna
+  // Background image ko screen me "cover" mode me fit karna
   const hRatio = canvas.width / img.naturalWidth;
   const vRatio = canvas.height / img.naturalHeight;
   const ratio = Math.max(hRatio, vRatio);
@@ -83,15 +94,19 @@ function renderFrame(frameIndex) {
   );
 }
 
-// Scroll Event
+// Smooth Frame Updating via RequestAnimationFrame
+let isTicking = false;
 window.addEventListener('scroll', () => {
-  requestAnimationFrame(() => {
-    const frameIndex = getCurrentFrameIndex();
-    renderFrame(frameIndex);
-  });
+  if (!isTicking) {
+    window.requestAnimationFrame(() => {
+      renderFrame(getCurrentFrameIndex());
+      isTicking = false;
+    });
+    isTicking = true;
+  }
 });
 
-// Window Resize Event
+// Window Resize Handling
 window.addEventListener('resize', resizeCanvas);
 
 // App Init
