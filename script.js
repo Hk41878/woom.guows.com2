@@ -1,116 +1,125 @@
-const TOTAL_FRAMES = 48; // Total 48 frames (001 to 048)
-const IMAGE_FOLDER = 'images'; // Folder ka naam
+const TOTAL_FRAMES = 300;
+const MAX_FPS = 30; // Max speed threshold (30 frames per second limit)
+const FRAME_INTERVAL = 1000 / MAX_FPS; // ~33.33ms per frame
 
-const canvas = document.getElementById('bgCanvas');
+const canvas = document.getElementById('hero-canvas');
 const ctx = canvas.getContext('2d');
+const loaderText = document.getElementById('loader-text');
+const loader = document.getElementById('loader');
 
 const images = [];
 let loadedCount = 0;
 
-// Helper: 1 ko "001", 10 ko "010" banane ke liye 3-digit zero-padding
-function formatFrameNumber(num) {
-  return String(num).padStart(3, '0');
-}
+let currentFrame = 0;
+let targetFrame = 0;
+let lastRenderTime = 0;
 
-// Image Path Generator: images/ezgif-frame-001.jpg
-function getImagePath(frameIndex) {
-  const formattedNumber = formatFrameNumber(frameIndex);
-  return `${IMAGE_FOLDER}/ezgif-frame-${formattedNumber}.jpg`;
-}
-
-// Window size ke according Canvas setup
+// Canvas resizing with aspect ratio cover mode
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  renderFrame(getCurrentFrameIndex());
+  renderFrame(Math.round(currentFrame));
+}
+window.addEventListener('resize', resizeCanvas);
+
+// Image Path Generator
+function getImagePath(index) {
+  // Pad number to 3 digits (e.g. 1 -> 001, 30 -> 030)
+  const paddedIndex = String(index).padStart(3, '0');
+  return `ezgif-frame-${paddedIndex}.jpg`; 
 }
 
-// Preload all 48 frames for lag-free scrolling
-function preloadImages() {
-  for (let i = 1; i <= TOTAL_FRAMES; i++) {
-    const img = new Image();
-    const src = getImagePath(i);
-    img.src = src;
+// Preload Images
+for (let i = 1; i <= TOTAL_FRAMES; i++) {
+  const img = new Image();
+  img.src = getImagePath(i);
+  
+  img.onload = () => {
+    loadedCount++;
+    loaderText.innerText = `Loading Images: ${loadedCount} / ${TOTAL_FRAMES}`;
+    if (loadedCount === TOTAL_FRAMES) {
+      loader.style.display = 'none';
+      resizeCanvas();
+      requestAnimationFrame(gameLoop);
+    }
+  };
 
-    img.onload = () => {
-      loadedCount++;
-      if (i === 1) {
-        renderFrame(1);
-      }
-    };
+  img.onerror = () => {
+    // Handling missing/error images gracefully
+    loadedCount++;
+    if (loadedCount === TOTAL_FRAMES) {
+      loader.style.display = 'none';
+      resizeCanvas();
+      requestAnimationFrame(gameLoop);
+    }
+  };
 
-    img.onerror = () => {
-      console.error(`Frame load nahi ho saka: ${src}. Check karein ki path aur filename sahi hain.`);
-    };
-
-    images.push(img);
-  }
+  images.push(img);
 }
 
-// Scroll Percentage ke according Exact Frame Index (1 to 48) calculate karna
-function getCurrentFrameIndex() {
-  const scrollTop = window.scrollY || document.documentElement.scrollTop;
-  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-  
-  if (maxScroll <= 0) return 1;
-
-  // Scroll ratio between 0.0 and 1.0
-  const scrollFraction = Math.min(1, Math.max(0, scrollTop / maxScroll));
-  
-  // Half scroll (0.5) = Frame 24 | Full scroll (1.0) = Frame 48
-  const frameIndex = Math.min(
-    TOTAL_FRAMES,
-    Math.max(1, Math.floor(scrollFraction * (TOTAL_FRAMES - 1)) + 1)
-  );
-  
-  return frameIndex;
-}
-
-// Canvas par frame render karna (Aspect Ratio Preserve karke)
-function renderFrame(frameIndex) {
-  const img = images[frameIndex - 1];
+// Draw frame on canvas (background object-fit cover effect)
+function renderFrame(index) {
+  const img = images[index];
   if (!img || !img.complete || img.naturalWidth === 0) return;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Background image ko screen me "cover" mode me fit karna
-  const hRatio = canvas.width / img.naturalWidth;
-  const vRatio = canvas.height / img.naturalHeight;
-  const ratio = Math.max(hRatio, vRatio);
+  const canvasRatio = canvas.width / canvas.height;
+  const imageRatio = img.width / img.height;
 
-  const centerShift_x = (canvas.width - img.naturalWidth * ratio) / 2;
-  const centerShift_y = (canvas.height - img.naturalHeight * ratio) / 2;
+  let drawWidth, drawHeight, offsetX, offsetY;
 
-  ctx.drawImage(
-    img,
-    0,
-    0,
-    img.naturalWidth,
-    img.naturalHeight,
-    centerShift_x,
-    centerShift_y,
-    img.naturalWidth * ratio,
-    img.naturalHeight * ratio
-  );
+  if (canvasRatio > imageRatio) {
+    drawWidth = canvas.width;
+    drawHeight = canvas.width / imageRatio;
+    offsetX = 0;
+    offsetY = (canvas.height - drawHeight) / 2;
+  } else {
+    drawWidth = canvas.height * imageRatio;
+    drawHeight = canvas.height;
+    offsetX = (canvas.width - drawWidth) / 2;
+    offsetY = 0;
+  }
+
+  ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
 }
 
-// Smooth Frame Updating via RequestAnimationFrame
-let isTicking = false;
+// Scroll Event: Calculate Target Frame
 window.addEventListener('scroll', () => {
-  if (!isTicking) {
-    window.requestAnimationFrame(() => {
-      renderFrame(getCurrentFrameIndex());
-      isTicking = false;
-    });
-    isTicking = true;
+  const scrollTop = window.scrollY;
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  
+  if (maxScroll <= 0) return;
+
+  const scrollFraction = Math.min(1, Math.max(0, scrollTop / maxScroll));
+  
+  // 10% scroll -> ~30 frames
+  // 50% scroll -> ~150 frames
+  // 100% scroll -> 300 frames
+  targetFrame = scrollFraction * (TOTAL_FRAMES - 1);
+});
+
+// Main Animation Loop with strict 30 FPS Throttling
+function gameLoop(timestamp) {
+  if (!lastRenderTime) lastRenderTime = timestamp;
+
+  const elapsed = timestamp - lastRenderTime;
+
+  // Render only if enough time passed (33.3ms for 30 FPS)
+  if (elapsed >= FRAME_INTERVAL) {
+    lastRenderTime = timestamp - (elapsed % FRAME_INTERVAL);
+
+    // Smooth transition towards target frame (step by step)
+    if (Math.abs(targetFrame - currentFrame) > 0.01) {
+      if (currentFrame < targetFrame) {
+        currentFrame = Math.min(currentFrame + 1, targetFrame);
+      } else if (currentFrame > targetFrame) {
+        currentFrame = Math.max(currentFrame - 1, targetFrame);
+      }
+      
+      renderFrame(Math.round(currentFrame));
+    }
   }
-});
 
-// Window Resize Handling
-window.addEventListener('resize', resizeCanvas);
-
-// App Init
-window.addEventListener('DOMContentLoaded', () => {
-  resizeCanvas();
-  preloadImages();
-});
+  requestAnimationFrame(gameLoop);
+}
