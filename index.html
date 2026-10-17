@@ -1,79 +1,45 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scroll Frame Sequence Background Website</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smooth 30 FPS Frame Scroll Player</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- Fullscreen Fixed Background Canvas -->
-  <div class="bg-canvas-container">
-    <canvas id="bgCanvas"></canvas>
-    <div class="bg-overlay"></div>
+  <!-- Fixed Background Canvas -->
+  <div class="canvas-container">
+    <canvas id="hero-canvas"></canvas>
   </div>
 
-  <!-- Main Website Content (Scrollable) -->
-  <main class="content">
-
-    <!-- Hero Section -->
-    <section class="section hero">
-      <div class="card glass">
-        <span class="badge">Next-Gen Experience</span>
-        <h1>Frame-by-Frame Scroll Website</h1>
-        <p>Aap jaise-jaise niche scroll karenge, background me images smooth animation ki tarah change hongi.</p>
-        <div class="btn-group">
-          <a href="#about" class="btn primary">Get Started</a>
-          <a href="#services" class="btn secondary">Learn More</a>
-        </div>
-      </div>
+  <!-- Foreground Content Layer -->
+  <div class="content">
+    <section class="section">
+      <h1>Scroll Down</h1>
+      <p>Continuous 30 FPS Animation Controlled by Scroll</p>
     </section>
-
-    <!-- About Section -->
-    <section class="section" id="about">
-      <div class="card glass">
-        <h2>About The Project</h2>
-        <p>Yeh layout HTML Canvas aur CSS sticky positioning ka use karke banaya gaya hai. Backside me aapki 1.jpeg se 7.jpeg tak ki images scroll progress ke hisab se render hoti hain.</p>
-      </div>
+    <section class="section">
+      <h1>10% Scroll = 30 Frames</h1>
+      <p>Fast scroll karein fir bhi 30 FPS limit bani rahegi.</p>
     </section>
-
-    <!-- Services / Features Section -->
-    <section class="section" id="services">
-      <div class="card glass">
-        <h2>Features & Services</h2>
-        <div class="grid">
-          <div class="grid-item">
-            <h3>⚡ Ultra Smooth</h3>
-            <p>Canvas 2D rendering fast loading aur smooth performance deti hai.</p>
-          </div>
-          <div class="grid-item">
-            <h3>🎨 Dynamic BG</h3>
-            <p>Background video jaisa feel deta hai Bina bhari video files upload kiye.</p>
-          </div>
-          <div class="grid-item">
-            <h3>📱 Responsive</h3>
-            <p>Mobile aur desktop sabhi devices par perfectly fit ho jata hai.</p>
-          </div>
-        </div>
-      </div>
+    <section class="section">
+      <h1>50% Scroll = 150 Frames</h1>
+      <p>Exactly 5 seconds me playback complete hoga.</p>
     </section>
-
-    <!-- Contact Section -->
-    <section class="section" id="contact">
-      <div class="card glass">
-        <h2>Contact Us</h2>
-        <p>Kuch sawal hai ya customization chahte hain? Niche details fill karein.</p>
-        <form class="contact-form" onsubmit="event.preventDefault();">
-          <input type="text" placeholder="Aapka Naam" required>
-          <input type="email" placeholder="Aapka Email" required>
-          <textarea rows="4" placeholder="Aapka Message"></textarea>
-          <button type="submit" class="btn primary">Send Message</button>
-        </form>
-      </div>
+    <section class="section">
+      <h1>100% Scroll = 300 Frames</h1>
+      <p>10 seconds total playback duration.</p>
     </section>
+  </div>
 
-  </main>
+  <!-- Loading Screen Overlay -->
+  <div id="loader" class="loader-overlay">
+    <div class="loader-content">
+      <div class="spinner"></div>
+      <p id="loader-text">Loading Images: 0 / 300</p>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
