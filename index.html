@@ -3,199 +3,78 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scroll Frame Sequence</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #0d0e12;
-      color: #ffffff;
-      overflow-x: hidden;
-    }
-
-    .scroll-container {
-      height: 350vh;
-      position: relative;
-    }
-
-    .sticky-wrapper {
-      position: sticky;
-      top: 0;
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-    }
-
-    canvas {
-      max-width: 90vw;
-      max-height: 85vh;
-      object-fit: contain;
-      border-radius: 12px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-    }
-
-    .overlay-ui {
-      position: absolute;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 12px 24px;
-      border-radius: 30px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      z-index: 10;
-    }
-
-    .frame-counter {
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      color: #00d2ff;
-    }
-
-    .progress-bar-bg {
-      width: 120px;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #00d2ff, #0072ff);
-      transition: width 0.1s ease-out;
-    }
-
-    .header-text {
-      position: absolute;
-      top: 30px;
-      text-align: center;
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .header-text h1 {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 5px;
-      background: linear-gradient(90deg, #ffffff, #a1a1a1);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .header-text p {
-      font-size: 14px;
-      color: #888888;
-    }
-  </style>
+  <title>Scroll Frame Sequence Background Website</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="scroll-container">
-    <div class="sticky-wrapper">
-      <div class="header-text">
-        <h1>Scroll Animation</h1>
-        <p>Niche scroll karke frames dekhein</p>
-      </div>
-
-      <canvas id="sequenceCanvas"></canvas>
-
-      <div class="overlay-ui">
-        <div class="frame-counter" id="frameCounter">Frame: 1 / 7</div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" id="progressBar"></div>
-        </div>
-      </div>
-    </div>
+  <!-- Fullscreen Fixed Background Canvas -->
+  <div class="bg-canvas-container">
+    <canvas id="bgCanvas"></canvas>
+    <div class="bg-overlay"></div>
   </div>
 
-  <script>
-    const TOTAL_FRAMES = 7;
-    const canvas = document.exitFullscreen ? document.getElementById('sequenceCanvas') : document.getElementById('sequenceCanvas');
-    const ctx = canvas.getContext('2d');
-    const frameCounter = document.getElementById('frameCounter');
-    const progressBar = document.getElementById('progressBar');
+  <!-- Main Website Content (Scrollable) -->
+  <main class="content">
 
-    const images = [];
+    <!-- Hero Section -->
+    <section class="section hero">
+      <div class="card glass">
+        <span class="badge">Next-Gen Experience</span>
+        <h1>Frame-by-Frame Scroll Website</h1>
+        <p>Aap jaise-jaise niche scroll karenge, background me images smooth animation ki tarah change hongi.</p>
+        <div class="btn-group">
+          <a href="#about" class="btn primary">Get Started</a>
+          <a href="#services" class="btn secondary">Learn More</a>
+        </div>
+      </div>
+    </section>
 
-    // Agar aapki images .jpg hain toh yahan extension change kar sakte hain (.jpeg se .jpg)
-    const IMAGE_EXTENSION = '.jpeg'; 
+    <!-- About Section -->
+    <section class="section" id="about">
+      <div class="card glass">
+        <h2>About The Project</h2>
+        <p>Yeh layout HTML Canvas aur CSS sticky positioning ka use karke banaya gaya hai. Backside me aapki 1.jpeg se 7.jpeg tak ki images scroll progress ke hisab se render hoti hain.</p>
+      </div>
+    </section>
 
-    function preloadImages() {
-      for (let i = 1; i <= TOTAL_FRAMES; i++) {
-        const img = new Image();
-        const src = `${i}${IMAGE_EXTENSION}`;
-        img.src = src;
+    <!-- Services / Features Section -->
+    <section class="section" id="services">
+      <div class="card glass">
+        <h2>Features & Services</h2>
+        <div class="grid">
+          <div class="grid-item">
+            <h3>⚡ Ultra Smooth</h3>
+            <p>Canvas 2D rendering fast loading aur smooth performance deti hai.</p>
+          </div>
+          <div class="grid-item">
+            <h3>🎨 Dynamic BG</h3>
+            <p>Background video jaisa feel deta hai Bina bhari video files upload kiye.</p>
+          </div>
+          <div class="grid-item">
+            <h3>📱 Responsive</h3>
+            <p>Mobile aur desktop sabhi devices par perfectly fit ho jata hai.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        img.onload = () => {
-          console.log(`Loaded: ${src}`);
-          if (i === 1) renderFrame(1);
-        };
+    <!-- Contact Section -->
+    <section class="section" id="contact">
+      <div class="card glass">
+        <h2>Contact Us</h2>
+        <p>Kuch sawal hai ya customization chahte hain? Niche details fill karein.</p>
+        <form class="contact-form" onsubmit="event.preventDefault();">
+          <input type="text" placeholder="Aapka Naam" required>
+          <input type="email" placeholder="Aapka Email" required>
+          <textarea rows="4" placeholder="Aapka Message"></textarea>
+          <button type="submit" class="btn primary">Send Message</button>
+        </form>
+      </div>
+    </section>
 
-        img.onerror = () => {
-          console.error(`Error loading image: ${src}. Please check if the file exists in the same folder.`);
-        };
+  </main>
 
-        images.push(img);
-      }
-    }
-
-    function renderFrame(frameIndex) {
-      const img = images[frameIndex - 1];
-      if (!img || !img.complete || img.naturalWidth === 0) return;
-
-      if (canvas.width !== img.naturalWidth || canvas.height !== img.naturalHeight) {
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-      }
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0);
-
-      frameCounter.innerText = `Frame: ${frameIndex} / ${TOTAL_FRAMES}`;
-      const progress = ((frameIndex - 1) / (TOTAL_FRAMES - 1)) * 100;
-      progressBar.style.width = `${progress}%`;
-    }
-
-    function handleScroll() {
-      const container = document.querySelector('.scroll-container');
-      const containerRect = container.getBoundingClientRect();
-      const scrollableHeight = containerRect.height - window.innerHeight;
-      
-      const scrollTop = Math.max(0, -containerRect.top);
-      const scrollFraction = Math.min(1, Math.max(0, scrollTop / scrollableHeight));
-
-      const frameIndex = Math.min(
-        TOTAL_FRAMES,
-        Math.max(1, Math.floor(scrollFraction * TOTAL_FRAMES) + 1)
-      );
-
-      requestAnimationFrame(() => renderFrame(frameIndex));
-    }
-
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', handleScroll);
-
-    // Initial load call
-    preloadImages();
-    // Fallback draw for first frame after a small delay incase load fires early
-    setTimeout(() => renderFrame(1), 500);
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
