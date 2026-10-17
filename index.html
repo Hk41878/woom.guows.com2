@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scroll Frame Sequence</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #0d0e12;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    /* Scroll Height Section - Controls scroll length */
+    .scroll-container {
+      height: 350vh; /* Scroll ki length badhane ya kam karne ke liye ise change karein */
+      position: relative;
+    }
+
+    /* Sticky Container - Stays pinned while scrolling */
+    .sticky-wrapper {
+      position: sticky;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Canvas for smooth rendering */
+    canvas {
+      max-width: 90vw;
+      max-height: 85vh;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Overlay Info UI */
+    .overlay-ui {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 12px 24px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      z-index: 10;
+    }
+
+    .frame-counter {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #00d2ff;
+    }
+
+    .progress-bar-bg {
+      width: 120px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00d2ff, #0072ff);
+      transition: width 0.1s ease-out;
+    }
+
+    /* Top Header Info */
+    .header-text {
+      position: absolute;
+      top: 30px;
+      text-align: center;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .header-text h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 5px;
+      background: linear-gradient(90deg, #ffffff, #a1a1a1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-text p {
+      font-size: 14px;
+      color: #888888;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="scroll-container">
+    <div class="sticky-wrapper">
+      <div class="header-text">
+        <h1>Scroll Animation</h1>
+        <p>Niche scroll karke frames dekhein</p>
+      </div>
+
+      <canvas id="sequenceCanvas"></canvas>
+
+      <div class="overlay-ui">
+        <div class="frame-counter" id="frameCounter">Frame: 1 / 7</div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const TOTAL_FRAMES = 7; // Kul images ki sankhya
+    const canvas = document.getElementById('sequenceCanvas');
+    const ctx = canvas.getContext('2d');
+    const frameCounter = document.getElementById('frameCounter');
+    const progressBar = document.getElementById('progressBar');
+
+    const images = [];
+    let imagesLoaded = 0;
+
+    // Image Paths Generator (1.jpeg se 7.jpeg)
+    function getImagePath(index) {
+      return `${index}.jpeg`;
+    }
+
+    // Images Preloading System
+    function preloadImages() {
+      for (let i = 1; i <= TOTAL_FRAMES; i++) {
+        const img = new Image();
+        img.src = getImagePath(i);
+
+        img.onload = () => {
+          imagesLoaded++;
+          if (i === 1) renderFrame(1); // Pehle frame ko turant render karein
+        };
+
+        // Agar image miss ho ya load na ho toh visual fallback create karna
+        img.onerror = () => {
+          console.warn(`Image ${getImagePath(i)} load nahi ho paayi. Placeholder create kiya ja raha hai.`);
+          const fallbackCanvas = document.createElement('canvas');
+          fallbackCanvas.width = 1280;
+          fallbackCanvas.height = 720;
+          const fCtx = fallbackCanvas.getContext('2d');
+          
+          // Canvas Placeholder styling
+          fCtx.fillStyle = '#1e222d';
+          fCtx.fillRect(0, 0, 1280, 720);
+          fCtx.fillStyle = '#00d2ff';
+          fCtx.font = 'bold 60px sans-serif';
+          fCtx.textAlign = 'center';
+          fCtx.fillText(`Image ${i}.jpeg missing`, 640, 360);
+          
+          img.src = fallbackCanvas.toDataURL();
+        };
+
+        images.push(img);
+      }
+    }
+
+    // Canvas par frame draw karne ka function
+    function renderFrame(frameIndex) {
+      const img = images[frameIndex - 1];
+      if (!img) return;
+
+      // Canvas dimensions ko image ke hisab se setup karna
+      if (canvas.width !== img.naturalWidth || canvas.height !== img.naturalHeight) {
+        canvas.width = img.naturalWidth || 1280;
+        canvas.height = img.naturalHeight || 720;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      // UI Update
+      frameCounter.innerText = `Frame: ${frameIndex} / ${TOTAL_FRAMES}`;
+      const progress = ((frameIndex - 1) / (TOTAL_FRAMES - 1)) * 100;
+      progressBar.style.width = `${progress}%`;
+    }
+
+    // Scroll Position ke basis par Current Frame Calculate karna
+    function handleScroll() {
+      const container = document.querySelector('.scroll-container');
+      const containerRect = container.getBoundingClientRect();
+      const scrollableHeight = containerRect.height - window.innerHeight;
+      
+      // Scroll percentage (0 to 1)
+      const scrollTop = Math.max(0, -containerRect.top);
+      const scrollFraction = Math.min(1, Math.max(0, scrollTop / scrollableHeight));
+
+      // Calculate corresponding frame (1 to TOTAL_FRAMES)
+      const frameIndex = Math.min(
+        TOTAL_FRAMES,
+        Math.max(1, Math.floor(scrollFraction * TOTAL_FRAMES) + 1)
+      );
+
+      requestAnimationFrame(() => renderFrame(frameIndex));
+    }
+
+    // Event Listeners
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', ()t => {
+      // Current scroll value se dubara draw karein resize par
+      handleScroll();
+    });
+
+    // App Init
+    preloadImages();
+  </script>
+</body>
+</html>
