@@ -1,7 +1,6 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* Ensure smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -18,7 +17,7 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: -1; /* Canvas peeche rahega */
+  z-index: -1;
   overflow: hidden;
 }
 
@@ -28,33 +27,32 @@ body {
   object-fit: cover;
 }
 
-/* Dark overlay gradient to ensure text readability */
+/* Overlay gradient taaki foreground text visible rahe */
 .bg-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle, rgba(11, 12, 16, 0.4) 0%, rgba(11, 12, 16, 0.85) 100%);
+  background: radial-gradient(circle, rgba(11, 12, 16, 0.3) 0%, rgba(11, 12, 16, 0.8) 100%);
 }
 
-/* Scrollable Content Styling */
+/* Website Sections */
 .content {
   position: relative;
-  z-index: 1; /* Content canvas ke upar float karega */
+  z-index: 1;
 }
 
 .section {
-  min-height: 100vh;
+  min-height: 120vh; /* Minimum height section ko di gayi hai taaki scroll achha mile */
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 40px 20px;
+  padding: 60px 20px;
 }
 
-/* Glassmorphism Card Style */
 .card {
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -63,116 +61,4 @@ body {
   max-width: 800px;
   width: 100%;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-}
-
-.badge {
-  display: inline-block;
-  padding: 6px 14px;
-  background: rgba(0, 210, 255, 0.2);
-  color: #00d2ff;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 15px;
-}
-
-h1 {
-  font-size: 2.8rem;
-  margin-bottom: 15px;
-  line-height: 1.2;
-}
-
-h2 {
-  font-size: 2rem;
-  margin-bottom: 15px;
-}
-
-p {
-  font-size: 1.1rem;
-  color: #d1d5db;
-  line-height: 1.6;
-  margin-bottom: 25px;
-}
-
-/* Buttons */
-.btn-group {
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-}
-
-.btn {
-  display: inline-block;
-  padding: 12px 28px;
-  border-radius: 30px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  border: none;
-}
-
-.btn.primary {
-  background: linear-gradient(90deg, #00d2ff, #0072ff);
-  color: #fff;
-}
-
-.btn.secondary {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(0, 210, 255, 0.3);
-}
-
-/* Feature Grid */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.grid-item {
-  background: rgba(0, 0, 0, 0.2);
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.grid-item h3 {
-  font-size: 1.2rem;
-  margin-bottom: 10px;
-}
-
-.grid-item p {
-  font-size: 0.95rem;
-  margin-bottom: 0;
-}
-
-/* Form Styling */
-.contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.contact-form input,
-.contact-form textarea {
-  width: 100%;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-  color: #fff;
-  font-size: 1rem;
-}
-
-.contact-form input:focus,
-.contact-form textarea:focus {
-  outline: none;
-  border-color: #00d2ff;
 }
