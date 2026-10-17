@@ -18,13 +18,11 @@
       overflow-x: hidden;
     }
 
-    /* Scroll Height Section - Controls scroll length */
     .scroll-container {
-      height: 350vh; /* Scroll ki length badhane ya kam karne ke liye ise change karein */
+      height: 350vh;
       position: relative;
     }
 
-    /* Sticky Container - Stays pinned while scrolling */
     .sticky-wrapper {
       position: sticky;
       top: 0;
@@ -36,7 +34,6 @@
       overflow: hidden;
     }
 
-    /* Canvas for smooth rendering */
     canvas {
       max-width: 90vw;
       max-height: 85vh;
@@ -45,7 +42,6 @@
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
     }
 
-    /* Overlay Info UI */
     .overlay-ui {
       position: absolute;
       bottom: 30px;
@@ -86,7 +82,6 @@
       transition: width 0.1s ease-out;
     }
 
-    /* Top Header Info */
     .header-text {
       position: absolute;
       top: 30px;
@@ -131,85 +126,61 @@
   </div>
 
   <script>
-    const TOTAL_FRAMES = 7; // Kul images ki sankhya
-    const canvas = document.getElementById('sequenceCanvas');
+    const TOTAL_FRAMES = 7;
+    const canvas = document.exitFullscreen ? document.getElementById('sequenceCanvas') : document.getElementById('sequenceCanvas');
     const ctx = canvas.getContext('2d');
     const frameCounter = document.getElementById('frameCounter');
     const progressBar = document.getElementById('progressBar');
 
     const images = [];
-    let imagesLoaded = 0;
 
-    // Image Paths Generator (1.jpeg se 7.jpeg)
-    function getImagePath(index) {
-      return `${index}.jpeg`;
-    }
+    // Agar aapki images .jpg hain toh yahan extension change kar sakte hain (.jpeg se .jpg)
+    const IMAGE_EXTENSION = '.jpeg'; 
 
-    // Images Preloading System
     function preloadImages() {
       for (let i = 1; i <= TOTAL_FRAMES; i++) {
         const img = new Image();
-        img.src = getImagePath(i);
+        const src = `${i}${IMAGE_EXTENSION}`;
+        img.src = src;
 
         img.onload = () => {
-          imagesLoaded++;
-          if (i === 1) renderFrame(1); // Pehle frame ko turant render karein
+          console.log(`Loaded: ${src}`);
+          if (i === 1) renderFrame(1);
         };
 
-        // Agar image miss ho ya load na ho toh visual fallback create karna
         img.onerror = () => {
-          console.warn(`Image ${getImagePath(i)} load nahi ho paayi. Placeholder create kiya ja raha hai.`);
-          const fallbackCanvas = document.createElement('canvas');
-          fallbackCanvas.width = 1280;
-          fallbackCanvas.height = 720;
-          const fCtx = fallbackCanvas.getContext('2d');
-          
-          // Canvas Placeholder styling
-          fCtx.fillStyle = '#1e222d';
-          fCtx.fillRect(0, 0, 1280, 720);
-          fCtx.fillStyle = '#00d2ff';
-          fCtx.font = 'bold 60px sans-serif';
-          fCtx.textAlign = 'center';
-          fCtx.fillText(`Image ${i}.jpeg missing`, 640, 360);
-          
-          img.src = fallbackCanvas.toDataURL();
+          console.error(`Error loading image: ${src}. Please check if the file exists in the same folder.`);
         };
 
         images.push(img);
       }
     }
 
-    // Canvas par frame draw karne ka function
     function renderFrame(frameIndex) {
       const img = images[frameIndex - 1];
-      if (!img) return;
+      if (!img || !img.complete || img.naturalWidth === 0) return;
 
-      // Canvas dimensions ko image ke hisab se setup karna
       if (canvas.width !== img.naturalWidth || canvas.height !== img.naturalHeight) {
-        canvas.width = img.naturalWidth || 1280;
-        canvas.height = img.naturalHeight || 720;
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
       }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
 
-      // UI Update
       frameCounter.innerText = `Frame: ${frameIndex} / ${TOTAL_FRAMES}`;
       const progress = ((frameIndex - 1) / (TOTAL_FRAMES - 1)) * 100;
       progressBar.style.width = `${progress}%`;
     }
 
-    // Scroll Position ke basis par Current Frame Calculate karna
     function handleScroll() {
       const container = document.querySelector('.scroll-container');
       const containerRect = container.getBoundingClientRect();
       const scrollableHeight = containerRect.height - window.innerHeight;
       
-      // Scroll percentage (0 to 1)
       const scrollTop = Math.max(0, -containerRect.top);
       const scrollFraction = Math.min(1, Math.max(0, scrollTop / scrollableHeight));
 
-      // Calculate corresponding frame (1 to TOTAL_FRAMES)
       const frameIndex = Math.min(
         TOTAL_FRAMES,
         Math.max(1, Math.floor(scrollFraction * TOTAL_FRAMES) + 1)
@@ -218,15 +189,13 @@
       requestAnimationFrame(() => renderFrame(frameIndex));
     }
 
-    // Event Listeners
     window.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', ()t => {
-      // Current scroll value se dubara draw karein resize par
-      handleScroll();
-    });
+    window.addEventListener('resize', handleScroll);
 
-    // App Init
+    // Initial load call
     preloadImages();
+    // Fallback draw for first frame after a small delay incase load fires early
+    setTimeout(() => renderFrame(1), 500);
   </script>
 </body>
 </html>
